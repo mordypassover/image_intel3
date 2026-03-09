@@ -17,12 +17,42 @@ def has_gps(data: dict):
 
 
 def latitude(data: dict):
-    pass
+    gps = data.get("GPSInfo")
+    if not gps:
+        return None
 
+    lat = gps.get(2)
+    ref = gps.get(1)
+
+    if not lat:
+        return None
+
+    deg, minute, sec = lat
+    value = deg + float(minute) / 60 + float(sec) / 3600
+
+    if ref == "S":
+        value = -value
+
+    return round(value, 4)
 
 def longitude(data: dict):
-    pass
+    gps = data.get("GPSInfo")
+    if not gps:
+        return None
 
+    lon = gps.get(4)
+    ref = gps.get(3)
+
+    if not lon:
+        return None
+
+    deg, minute, sec = lon
+    value = deg + float(minute) / 60 + float(sec) / 3600
+
+    if ref == "W":
+        value = -value
+
+    return round(value, 4)
 
 def datatime(data: dict):
     return data['DateTimeOriginal'] if 'DateTimeOriginal' in data else None
@@ -103,3 +133,5 @@ def extract_all(folder_path):
         elif image_path.is_dir() and not image_path.is_symlink():
             final_list += extract_all(image_path)
     return final_list
+
+print(extract_all(r"C:\Users\USER\PycharmProjects\image_intel3\images\ready"))
