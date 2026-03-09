@@ -29,7 +29,7 @@ def datatime(data: dict):
 
 
 def camera_make(data: dict):
-    pass
+    return data['Make'] if 'Make' in data else None
 
 
 def camera_model(data: dict):
