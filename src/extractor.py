@@ -23,6 +23,7 @@ def latitude(data: dict):
 def longitude(data: dict):
     pass
 
+
 def datatime(data: dict):
     pass
 
@@ -33,7 +34,6 @@ def camera_make(data: dict):
 
 def camera_model(data: dict):
     return data['Model'] if 'Model' in data else None
-
 
 
 def extract_metadata(image_path):
@@ -96,4 +96,10 @@ def extract_all(folder_path):
     Returns:
         list של dicts (כמו extract_metadata)
     """
-    pass
+    final_list=[]
+    for image_path in Path(folder_path).iterdir():
+        if image_path.is_file():
+            final_list.append(extract_metadata(image_path))
+        elif image_path.is_dir() and not image_path.is_symlink():
+            final_list += extract_all(image_path)
+    return final_list
