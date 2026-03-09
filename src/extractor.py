@@ -133,5 +133,3 @@ def extract_all(folder_path):
         elif image_path.is_dir() and not image_path.is_symlink():
             final_list += extract_all(image_path)
     return final_list
-
-print(extract_all(r"C:\Users\USER\PycharmProjects\image_intel3\images\ready"))
