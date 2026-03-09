@@ -25,7 +25,7 @@ def longitude(data: dict):
 
 
 def datatime(data: dict):
-    return data['datetime'] if 'datetime' in data else None
+    return data['DateTimeOriginal'] if 'DateTimeOriginal' in data else None
 
 
 def camera_make(data: dict):
