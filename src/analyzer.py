@@ -14,7 +14,7 @@
     }
 """
 def total_images(images_data):
-    pass
+    return len(images_data)
 
 def images_with_gps(images_data):
     pass
