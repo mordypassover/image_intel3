@@ -17,9 +17,13 @@ import folium
 from datetime import datetime
 
 def sort_by_time(arr):
-    return sorted(arr,key=lambda x:datetime.strptime(x["datetime"],"%Y-%m-%d %H:%M:%S"))
+    def parse_time(item):
+        try:
+            return datetime.strptime(item.get("datetime", ""), "%Y-%m-%d %H:%M:%S")
+        except (ValueError, TypeError):
+            return datetime.max
 
-
+    return sorted(arr, key=parse_time)
 
 
 def extract_center_of_map(list_location: list[dict]) -> list:
@@ -33,46 +37,47 @@ def extract_center_of_map(list_location: list[dict]) -> list:
 
     return [latitude_avg, longitude_avg]
 
+# Supported folium marker colors, assigned round-robin per unique device
+COLORS = [
+    'red','blue','green','purple','orange','darkred',
+    'lightred','beige','darkblue','darkgreen','cadetblue',
+    'darkpurple','white','pink','lightblue','lightgreen',
+    'gray','black','lightgray'
+]
+_device_colors = {}
+
 def get_device_color(device_name):
-    # returns a color for device
-    colors = {'Samsung': 'blue', 'Apple': 'red', 'iPhone': 'red', 'Google': 'green', 'Xiaomi': 'orange'}
-    brand = device_name.strip() if device_name else "Unknown"
-    return colors.get(brand, 'gray')
+    key = (device_name or "Unknown").strip()
+    if key not in _device_colors:
+        _device_colors[key] = COLORS[len(_device_colors) % len(COLORS)]
+    return _device_colors[key]
+
+def add_markers_to_map(m, sorted_data):
+    for loc in sorted_data:
+        if loc.get("has_gps"):
+            filename, datetime, camera_model = loc["filename"], loc["datetime"], loc["camera_model"]
+            details = f"<b>File:</b> {filename}<br><b>Date:</b> {datetime}<br><b>Camera:</b> {camera_model}"
+            folium.Marker(
+                [loc["latitude"], loc["longitude"]],
+                popup=folium.Popup(details, max_width=250),
+                icon=folium.Icon(color=get_device_color(camera_model))
+            ).add_to(m)
 
 def create_map(images_data):
     """
     יוצר מפה אינטראקטיבית עם כל המיקומים.
-
     Args:
         images_data: רשימת מילונים מ-extract_all
-
     Returns:
         string של HTML (המפה)
     """
     sorted_data = sort_by_time(images_data)
     valid_coords = [[loc["latitude"], loc["longitude"]] for loc in sorted_data if loc.get("has_gps")]
-    center_map = extract_center_of_map(valid_coords)
-    m = folium.Map(location=center_map, zoom_start=11)
-
-    folium.PolyLine(
-        locations=valid_coords, color="blue", weight=3, opacity=1
-    ).add_to(m)
-
-    for loc in images_data:
-        if loc["has_gps"]:
-            filename = loc["filename"]
-            datetime = loc["datetime"]
-            camera_make = loc["camera_make"]
-            icon_color = get_device_color(camera_make)
-            details = f"{filename=} - {datetime=} - {camera_make=}"
-
-            folium.Marker([loc["latitude"], loc["longitude"]],
-                          popup=details,
-                          icon=folium.Icon(color=icon_color)
-                          ).add_to(m)
+    m = folium.Map(location=extract_center_of_map(valid_coords), zoom_start=11)
+    folium.PolyLine(locations=valid_coords, color="blue", weight=3, opacity=1).add_to(m)
+    add_markers_to_map(m, sorted_data)
 
     return m._repr_html_()
-
 
 
 if __name__ == "__main__":
