@@ -33,3 +33,14 @@ def date_range(images_data):# בודק טווח זמן מחזיר תאריך ת�
 def detect_camera_switches(images_data):
     pass
 
+def pictures_in_range_detection(images_data,rad_range):
+    pass
+
+def time_difference_detection(images_data, time_difference):
+    pass
+
+def location_repeat_detection(images_data):
+    pass
+
+def file_analysis(images_data):
+    pass
