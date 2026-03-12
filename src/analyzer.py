@@ -1,4 +1,7 @@
 from map_view import sort_by_time
+from geopy.distance import geodesic
+from geopy.geocoders import Nominatim
+
 """{
     "total_images": 12,
     "images_with_gps": 10,
@@ -33,8 +36,44 @@ def date_range(images_data):# בודק טווח זמן מחזיר תאריך ת�
 def detect_camera_switches(images_data):
     pass
 
-def pictures_in_range_detection(images_data,rad_range):
-    pass
+def get_city_name(lat, lon):
+    geolocator = Nominatim(user_agent="my_app")
+
+    location = geolocator.reverse(f"{lat}, {lon}", language="he")
+    if location:
+        address = location.raw.get("address", {})
+        return address.get("city") or address.get("town") or address.get("village")
+
+def pictures_in_range_detection(images_data, rad_range):
+    clusters = []
+    sorted_data = sorted(images_data, key=lambda img: (img["latitude"], img["longitude"]), reverse=True)
+
+    while sorted_data:
+        first_point = sorted_data.pop(0)
+        source = (first_point["latitude"], first_point["longitude"])
+        tmp_result = [first_point]
+
+        remaining = []
+        for img in sorted_data:
+            destination = (img["latitude"], img["longitude"])
+            distance = geodesic(source, destination).km
+
+            if distance <= rad_range:
+                tmp_result.append(img)
+            else:
+                remaining.append(img)
+
+        sorted_data = remaining
+
+        if len(tmp_result) > 1:
+            clusters.append(tmp_result)
+
+    result = []
+    for cluster in clusters:
+        city_name = get_city_name(cluster[0]["latitude"], cluster[0]["longitude"])
+        result.append((city_name, len(cluster)))
+
+    return result
 
 def time_difference_detection(images_data, time_difference):
     pass
