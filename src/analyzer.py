@@ -58,7 +58,7 @@ def get_city_name(lat, lon):
         address = location.raw.get("address", {})
         return address.get("city") or address.get("town") or address.get("village")
 
-def pictures_in_range_detection(images_data, rad_range):
+def pictures_in_range_detection(images_data, rad_range=1):
     clusters = []
     sorted_data = sorted(images_data, key=lambda img: (img["latitude"], img["longitude"]), reverse=True)
 
@@ -89,11 +89,21 @@ def pictures_in_range_detection(images_data, rad_range):
 
     return result
 
-def time_difference_detection(images_data, time_difference):
+def time_difference_detection(images_data, time_difference=12):
     pass
 
 def location_repeat_detection(images_data):
     pass
+
+def insights_organisation(images_data):
+    return [
+        detect_camera_switches(images_data),
+        pictures_in_range_detection(images_data   ),
+        time_difference_detection(images_data),
+        location_repeat_detection(images_data)
+    ]
+
+
 
 def file_analysis(images_data):
     pass
