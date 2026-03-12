@@ -1,4 +1,5 @@
 from map_view import sort_by_time
+from extractor import extract_all
 from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
 
@@ -106,4 +107,11 @@ def insights_organisation(images_data):
 
 
 def file_analysis(images_data):
-    pass
+    extracted_data=extract_all(images_data)
+    analysis = {"total_images": total_images(extracted_data),
+                "images_with_gps": images_with_gps(extracted_data),
+                "images_with_datetime": images_with_datetime(extracted_data),
+                "unique_cameras": unique_cameras(extracted_data),
+                "date_range": date_range(extracted_data),
+                "insights": insights_organisation(extracted_data)}
+    return analysis
