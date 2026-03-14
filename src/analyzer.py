@@ -88,7 +88,8 @@ def pictures_in_range_detection(images_data, rad_range=1):
         city_name = get_city_name(cluster[0]["latitude"], cluster[0]["longitude"])
         result.append((city_name, len(cluster)))
 
-    return result
+    result_str =[ "ריכוז של "+ f"{i[1]} " + f"תמונות ב{i[0]} " for i in result]
+    return ",".join(result_str)
 
 def time_difference_detection(images_data, time_difference=12):
     pass
