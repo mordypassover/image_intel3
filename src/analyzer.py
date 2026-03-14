@@ -95,8 +95,34 @@ def pictures_in_range_detection(images_data, rad_range=1):
 def time_difference_detection(images_data, time_difference=12):
     pass
 
-def location_repeat_detection(images_data):
-    pass
+def location_repeat_detection(images_data, radius_km=0.2):
+
+    gps_images = [img for img in images_data if img.get("has_gps")]
+
+    repeats = []
+
+    for i in range(len(gps_images)):
+        for j in range(i + 1, len(gps_images)):
+
+            coord1 = (gps_images[i]["latitude"], gps_images[i]["longitude"])
+            coord2 = (gps_images[j]["latitude"], gps_images[j]["longitude"])
+
+            distance = geodesic(coord1, coord2).km
+
+            if distance <= radius_km:
+
+                city = get_city_name(*coord1)
+
+                repeats.append(
+                    f"הסוכן חזר למיקום באזור {city}"
+                )
+
+                break
+
+    if repeats:
+        return ", ".join(set(repeats))
+
+    return ""
 
 def insights_organisation(images_data):
     return [
