@@ -17,7 +17,7 @@ def total_images(images_data):
     return len(images_data)
 
 def images_with_gps(images_data):
-    pass
+    return sum(1 for img in images_data if img.get("has_gps"))
 
 def images_with_datetime(images_data):
     pass
