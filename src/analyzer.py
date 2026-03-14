@@ -99,15 +99,15 @@ def location_repeat_detection(images_data):
 def insights_organisation(images_data):
     return [
         detect_camera_switches(images_data),
-        pictures_in_range_detection(images_data   ),
+        pictures_in_range_detection(images_data),
         time_difference_detection(images_data),
         location_repeat_detection(images_data)
     ]
 
 
 
-def file_analysis(images_data):
-    extracted_data=extract_all(images_data)
+def file_analysis(filepath):#מקבלת נתיב לתיקיה ומחלצת את המידע הלבנתי על ידי פונקציה ומחזירה אנליזה של התיקית תמונות
+    extracted_data=extract_all(filepath)
     analysis = {"total_images": total_images(extracted_data),
                 "images_with_gps": images_with_gps(extracted_data),
                 "images_with_datetime": images_with_datetime(extracted_data),
