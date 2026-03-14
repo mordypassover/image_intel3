@@ -1,4 +1,8 @@
 from map_view import sort_by_time
+from extractor import extract_all
+from geopy.distance import geodesic
+from geopy.geocoders import Nominatim
+
 """{
     "total_images": 12,
     "images_with_gps": 10,
@@ -20,10 +24,10 @@ def images_with_gps(images_data):
     return sum(1 for img in images_data if img.get("has_gps"))
 
 def images_with_datetime(images_data):
-    pass
+    return len(list(filter(lambda image: image["datetime"]!=False, images_data)))
 
 def unique_cameras(images_data):
-    pass
+    return list(set(image['camera_model'] for image in images_data))
 
 def date_range(images_data):# בודק טווח זמן מחזיר תאריך תמונה ראשונה ואחרונה.
     return {"start": sort_by_time(images_data)[0]["datetime"].split()[0],  "end": sort_by_time(images_data)[-1]["datetime"].split()[0]}
@@ -45,16 +49,71 @@ def detect_camera_switches(images_data):
                 "from": prev_cam,
                 "to": curr_cam
             })
-    return switches
+    switches_str=[f"הסוכן החליף מ- {i['from']} ל- {i["to"]} ב- {i["date"]}" for i in switches]
+    return ", ".join(switches_str)
 
-def pictures_in_range_detection(images_data,rad_range):
-    pass
+def get_city_name(lat, lon):
+    geolocator = Nominatim(user_agent="my_app")
 
-def time_difference_detection(images_data, time_difference):
+    location = geolocator.reverse(f"{lat}, {lon}", language="he")
+    if location:
+        address = location.raw.get("address", {})
+        return address.get("city") or address.get("town") or address.get("village")
+
+def pictures_in_range_detection(images_data, rad_range=1):
+    clusters = []
+    sorted_data = sorted(images_data, key=lambda img: (img["latitude"], img["longitude"]), reverse=True)
+
+    while sorted_data:
+        first_point = sorted_data.pop(0)
+        source = (first_point["latitude"], first_point["longitude"])
+        tmp_result = [first_point]
+
+        remaining = []
+        for img in sorted_data:
+            destination = (img["latitude"], img["longitude"])
+            distance = geodesic(source, destination).km
+
+            if distance <= rad_range:
+                tmp_result.append(img)
+            else:
+                remaining.append(img)
+
+        sorted_data = remaining
+
+        if len(tmp_result) > 1:
+            clusters.append(tmp_result)
+
+    result = []
+    for cluster in clusters:
+        city_name = get_city_name(cluster[0]["latitude"], cluster[0]["longitude"])
+        result.append((city_name, len(cluster)))
+
+    result_str =[ "ריכוז של "+ f"{i[1]} " + f"תמונות ב{i[0]} " for i in result]
+    return ",".join(result_str)
+
+def time_difference_detection(images_data, time_difference=12):
     pass
 
 def location_repeat_detection(images_data):
     pass
 
-def file_analysis(images_data):
-    pass
+def insights_organisation(images_data):
+    return [
+        detect_camera_switches(images_data),
+        pictures_in_range_detection(images_data),
+        time_difference_detection(images_data),
+        location_repeat_detection(images_data)
+    ]
+
+
+
+def file_analysis(filepath):#מקבלת נתיב לתיקיה ומחלצת את המידע הלבנתי על ידי פונקציה ומחזירה אנליזה של התיקית תמונות
+    extracted_data=extract_all(filepath)
+    analysis = {"total_images": total_images(extracted_data),
+                "images_with_gps": images_with_gps(extracted_data),
+                "images_with_datetime": images_with_datetime(extracted_data),
+                "unique_cameras": unique_cameras(extracted_data),
+                "date_range": date_range(extracted_data),
+                "insights": insights_organisation(extracted_data)}
+    return analysis
