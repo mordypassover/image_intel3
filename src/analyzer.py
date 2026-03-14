@@ -49,7 +49,8 @@ def detect_camera_switches(images_data):
                 "from": prev_cam,
                 "to": curr_cam
             })
-    return switches
+    switches_str=[f"הסוכן החליף מ- {i['from']} ל- {i["to"]} ב- {i["date"]}" for i in switches]
+    return ", ".join(switches_str)
 
 def get_city_name(lat, lon):
     geolocator = Nominatim(user_agent="my_app")
