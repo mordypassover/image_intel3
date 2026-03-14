@@ -27,7 +27,7 @@ def images_with_datetime(images_data):
     return len(list(filter(lambda image: image["datetime"]!=False, images_data)))
 
 def unique_cameras(images_data):
-    pass
+    return list(set(image['camera_model'] for image in images_data))
 
 def date_range(images_data):# בודק טווח זמן מחזיר תאריך תמונה ראשונה ואחרונה.
     return {"start": sort_by_time(images_data)[0]["datetime"].split()[0],  "end": sort_by_time(images_data)[-1]["datetime"].split()[0]}
