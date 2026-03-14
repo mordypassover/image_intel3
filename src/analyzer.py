@@ -24,7 +24,7 @@ def images_with_gps(images_data):
     pass
 
 def images_with_datetime(images_data):
-    pass
+    return len(list(filter(lambda image: image["datetime"]!=False, images_data)))
 
 def unique_cameras(images_data):
     pass
