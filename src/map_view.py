@@ -17,14 +17,7 @@ import folium
 from datetime import datetime
 
 def sort_by_time(arr):
-    def parse_time(item):
-        try:
-            return datetime.strptime(item.get("datetime", ""), "%Y-%m-%d %H:%M:%S")
-        except (ValueError, TypeError):
-            return datetime.max
-
-    return sorted(arr, key=parse_time)
-
+    return sorted(arr, key=lambda x: datetime.strptime(x["datetime"], "%Y-%m-%d %H:%M:%S") if x.get("datetime") else datetime.max)
 
 def extract_center_of_map(list_location: list[dict]) -> list:
 
@@ -37,60 +30,59 @@ def extract_center_of_map(list_location: list[dict]) -> list:
 
     return [latitude_avg, longitude_avg]
 
-# Supported folium marker colors, assigned round-robin per unique device
-COLORS = [
-    'red','blue','green','purple','orange','darkred',
-    'lightred','beige','darkblue','darkgreen','cadetblue',
-    'darkpurple','white','pink','lightblue','lightgreen',
-    'gray','black','lightgray'
-]
-_device_colors = {}
-
 def get_device_color(device_name):
-    key = (device_name or "Unknown").strip()
-    if key not in _device_colors:
-        _device_colors[key] = COLORS[len(_device_colors) % len(COLORS)]
-    return _device_colors[key]
-
-def add_markers_to_map(m, sorted_data):
-    for loc in sorted_data:
-        if loc.get("has_gps"):
-            filename, datetime, camera_model = loc["filename"], loc["datetime"], loc["camera_model"]
-            details = f"<b>File:</b> {filename}<br><b>Date:</b> {datetime}<br><b>Camera:</b> {camera_model}"
-            folium.Marker(
-                [loc["latitude"], loc["longitude"]],
-                popup=folium.Popup(details, max_width=250),
-                icon=folium.Icon(color=get_device_color(camera_model))
-            ).add_to(m)
+    # returns a color for device
+    colors = {'Samsung': 'blue', 'Apple': 'red', 'iPhone': 'red', 'Google': 'green', 'Xiaomi': 'orange'}
+    brand = device_name.strip() if device_name else "Unknown"
+    return colors.get(brand, 'gray')
 
 def create_map(images_data):
     """
     יוצר מפה אינטראקטיבית עם כל המיקומים.
+
     Args:
         images_data: רשימת מילונים מ-extract_all
+
     Returns:
         string של HTML (המפה)
     """
     sorted_data = sort_by_time(images_data)
     valid_coords = [[loc["latitude"], loc["longitude"]] for loc in sorted_data if loc.get("has_gps")]
-    m = folium.Map(location=extract_center_of_map(valid_coords), zoom_start=11)
-    folium.PolyLine(locations=valid_coords, color="blue", weight=3, opacity=1).add_to(m)
-    add_markers_to_map(m, sorted_data)
+    center_map = extract_center_of_map(valid_coords)
+    m = folium.Map(location=center_map, zoom_start=11)
+
+    folium.PolyLine(
+        locations=valid_coords, color="blue", weight=3, opacity=1
+    ).add_to(m)
+
+    for loc in images_data:
+        if loc["has_gps"]:
+            filename = loc["filename"]
+            datetime = loc["datetime"]
+            camera_make = loc["camera_make"]
+            icon_color = get_device_color(camera_make)
+            details = f"{filename=} - {datetime=} - {camera_make=}"
+
+            folium.Marker([loc["latitude"], loc["longitude"]],
+                          popup=details,
+                          icon=folium.Icon(color=icon_color)
+                          ).add_to(m)
 
     return m._repr_html_()
 
 
-if __name__ == "__main__":
-    # תיקון: fake_data הועבר לכאן מגוף הקובץ - כדי שלא ירוץ בכל import
-    fake_data = [
-        {"filename": "test1.jpg", "latitude": 32.0853, "longitude": 34.7818,
-         "has_gps": True, "camera_make": "Samsung", "camera_model": "Galaxy S23",
-         "datetime": "2025-01-12 08:30:00"},
-        {"filename": "test2.jpg", "latitude": 31.7683, "longitude": 35.2137,
-         "has_gps": True, "camera_make": "Apple", "camera_model": "iPhone 15 Pro",
-         "datetime": "2025-01-13 09:00:00"},
-    ]
-    html = create_map(fake_data)
-    with open("test_map.html", "w", encoding="utf-8") as f:
-        f.write(html)
-    print("Map saved to test_map.html")
+
+# if __name__ == "__main__":
+#     # תיקון: fake_data הועבר לכאן מגוף הקובץ - כדי שלא ירוץ בכל import
+#     fake_data = [
+#         {"filename": "test1.jpg", "latitude": 32.0853, "longitude": 34.7818,
+#          "has_gps": True, "camera_make": "Samsung", "camera_model": "Galaxy S23",
+#          "datetime": "2025-01-12 08:30:00"},
+#         {"filename": "test2.jpg", "latitude": 31.7683, "longitude": 35.2137,
+#          "has_gps": True, "camera_make": "Apple", "camera_model": "iPhone 15 Pro",
+#          "datetime": "2025-01-13 09:00:00"},
+#     ]
+#     html = create_map(fake_data)
+#     with open("test_map.html", "w", encoding="utf-8") as f:
+#         f.write(html)
+#     print("Map saved to test_map.html")

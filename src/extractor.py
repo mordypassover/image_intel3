@@ -55,8 +55,8 @@ def longitude(data: dict):
     return round(value, 4)
 
 def datatime(data: dict):
-    return data['DateTimeOriginal'] if 'DateTimeOriginal' in data else None
-
+    dt = data.get('DateTimeOriginal')
+    return dt.replace(":", "-", 2) if dt else None
 
 def camera_make(data: dict):
     return data['Make'] if 'Make' in data else None
