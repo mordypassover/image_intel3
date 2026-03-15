@@ -213,8 +213,8 @@ def insights_organisation(images_data):
 
     return format_insights(switches, clusters, time_gaps, repeated_cities)
 
-def file_analysis(filepath) -> dict:
-    extracted_data = extract_all(filepath)
+def file_analysis(extracted_data) -> dict:
+
     return {
         "total_images": total_images(extracted_data),
         "images_with_gps": images_with_gps(extracted_data),
