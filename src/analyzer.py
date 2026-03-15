@@ -2,6 +2,7 @@ from map_view import sort_by_time
 from extractor import extract_all
 from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
+from datetime import datetime
 
 """{
     "total_images": 12,
@@ -93,7 +94,32 @@ def pictures_in_range_detection(images_data, rad_range=1):
     return ",".join(result_str)
 
 def time_difference_detection(images_data, time_difference=12):
-    pass
+    if len(images_data) < 2:
+        return []
+
+    def parse_datetime(img):
+        try:
+            return datetime.strptime(img["datetime"], "%Y-%m-%d %H:%M:%S")
+        except (ValueError, KeyError, TypeError):
+            return None  # תמונה ללא תאריך תקין
+
+    sorted_images = sort_by_time(images_data)
+    flagged = set()
+
+    for i in range(len(sorted_images) - 1):
+        current_dt = parse_datetime(sorted_images[i])
+        next_dt = parse_datetime(sorted_images[i + 1])
+
+        if current_dt is None or next_dt is None:
+            continue
+
+        diff_hours = (next_dt - current_dt).total_seconds() / 3600
+
+        if diff_hours >= time_difference:
+            flagged.add(sorted_images[i]["filename"])
+            flagged.add(sorted_images[i + 1]["filename"])
+
+    return [img for img in sorted_images if img["filename"] in flagged]
 
 def location_repeat_detection(images_data, radius_km=0.2):
 
@@ -131,7 +157,6 @@ def insights_organisation(images_data):
         time_difference_detection(images_data),
         location_repeat_detection(images_data)
     ]
-
 
 
 def file_analysis(filepath):#מקבלת נתיב לתיקיה ומחלצת את המידע הלבנתי על ידי פונקציה ומחזירה אנליזה של התיקית תמונות
