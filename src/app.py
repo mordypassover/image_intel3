@@ -1,22 +1,36 @@
 from flask import Flask, render_template, request
 import os
+import tempfile
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def index():
-    """דף הבית - טופס לבחירת תיקייה"""
     return render_template('index.html')
 
 
 @app.route('/analyze', methods=['POST'])
 def analyze_images():
-    """מקבל נתיב תיקייה, מריץ את כל המודולים, מחזיר דו"ח"""
-    folder_path = request.form.get('folder_path')
 
-    if not folder_path or not os.path.isdir(folder_path):
-        return "תיקייה לא נמצאה", 400
+    folder_path = request.form.get('folder_path')
+    uploaded_files = request.files.getlist('photos')
+
+    # מצב א': הגיע נתיב תיקייה
+    if folder_path and folder_path.strip():
+        folder_path = folder_path.strip()
+        if not os.path.isdir(folder_path):
+            return f"תיקייה לא נמצאה: '{folder_path}'", 400
+
+    # מצב ב': הגיעו קבצים - שומרים אותם בתיקייה זמנית
+    elif uploaded_files and uploaded_files[0].filename:
+        tmp_dir = tempfile.mkdtemp()
+        for f in uploaded_files:
+            f.save(os.path.join(tmp_dir, f.filename))
+        folder_path = tmp_dir
+
+    else:
+        return "לא נשלחו קבצים או נתיב", 400
 
     # שלב 1: שליפת נתונים
     from extractor import extract_all
@@ -36,15 +50,8 @@ def analyze_images():
 
     # שלב 5: הרכבת דו"ח
     from report import create_report
-    report_html = create_report(images_data, map_html, timeline_html, analysis)
+    return create_report(images_data, map_html, timeline_html, analysis)
 
-    return report_html
-
-def fake_extract_all(folder):
-    return [{"filename": "test.jpg", "has_gps": True, "latitude": 32.0, "longitude": 34.7, ...}]
-
-def fake_create_map(data):
-    return "<h2>Map placeholder</h2>"
 
 if __name__ == '__main__':
     app.run(debug=True)
