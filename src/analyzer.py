@@ -1,5 +1,4 @@
 from map_view import sort_by_time
-from extractor import extract_all
 from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
 from datetime import datetime
