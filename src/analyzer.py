@@ -47,10 +47,11 @@ def unique_cameras(images_data):
 
 def date_range(images_data):
     sorted_data = sort_by_time(images_data)
+    sorted_data=[data for data in sorted_data if data["datetime"]]
     return {
         "start": sorted_data[0]["datetime"].split()[0],
         "end": sorted_data[-1]["datetime"].split()[0]
-    }
+    } if sorted_data[0]["datetime"] and sorted_data[-1]["datetime"] else None
 
 def detect_camera_switches(images_data):
     sorted_images = sorted(
