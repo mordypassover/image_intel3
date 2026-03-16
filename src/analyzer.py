@@ -1,5 +1,4 @@
 from map_view import sort_by_time
-from extractor import extract_all
 from geopy.distance import geodesic
 from geopy.geocoders import Nominatim
 from datetime import datetime
@@ -213,13 +212,12 @@ def insights_organisation(images_data):
 
     return format_insights(switches, clusters, time_gaps, repeated_cities)
 
-def file_analysis(filepath) -> dict:
-    extracted_data = extract_all(filepath)
+def file_analysis(images_data) -> dict:
     return {
-        "total_images": total_images(extracted_data),
-        "images_with_gps": images_with_gps(extracted_data),
-        "images_with_datetime": images_with_datetime(extracted_data),
-        "unique_cameras": unique_cameras(extracted_data),
-        "date_range": date_range(extracted_data),
-        "insights": insights_organisation(extracted_data)
+        "total_images": total_images(images_data),
+        "images_with_gps": images_with_gps(images_data),
+        "images_with_datetime": images_with_datetime(images_data),
+        "unique_cameras": unique_cameras(images_data),
+        "date_range": date_range(images_data),
+        "insights": insights_organisation(images_data)
     }
