@@ -34,7 +34,7 @@ def create_report(images_data, map_html, timeline_html, analysis):
         <title>Image Intel Report</title>
         <style>
             body {{
-                font-family: Arial, sans-serif;
+                font-family: Heebo, sans-serif;
                 max-width: 1200px;
                 margin: 0 auto;
                 padding: 20px;
