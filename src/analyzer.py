@@ -49,8 +49,8 @@ def date_range(images_data):
     sorted_data = sort_by_time(images_data)
     sorted_data=[data for data in sorted_data if data["datetime"]]
     return {
-        "start": sorted_data[0]["datetime"],
-        "end": sorted_data[-1]["datetime"]
+        "start": sorted_data[0]["datetime"].date().isoformat(),
+        "end": sorted_data[-1]["datetime"].date().isoformat(),
     } if sorted_data[0]["datetime"] and sorted_data[-1]["datetime"] else None
 
 def detect_camera_switches(images_data):

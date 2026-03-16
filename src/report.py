@@ -105,12 +105,53 @@ body {{
 ul {{
     line-height: 1.8;
 }}
-
-.footer {{
+.footer{{
+    margin-top:40px;
+    padding:25px 20px;
     text-align:center;
-    color:#888;
-    margin-top:30px;
-    font-size:0.9em;
+    background:#f4f6f9;
+    border-top:2px solid #6da3ff;
+    border-radius:10px 10px 0 0;
+    font-family:Arial, sans-serif;
+}}
+
+.footer-title{{
+    font-size:1.2em;
+    font-weight:bold;
+    color:#3b6fd8;
+    margin-bottom:6px;
+}}
+
+.footer-text{{
+    font-size:0.85em;
+    color:#666;
+    margin-bottom:14px;
+}}
+
+.team{{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+}}
+
+.team span{{
+    padding:5px 12px;
+    border-radius:16px;
+    background:#e3e8f3;
+    font-size:0.85em;
+    color:#444;
+    transition:all 0.2s ease;
+}}
+
+.team span:hover{{
+    background:#6da3ff;
+    color:white;
+    transform:translateY(-2px);
+}}
+
+.ai{{
+    background:#cdb4ff !important;
 }}
 
 .main-layout {{
@@ -217,7 +258,17 @@ ul {{
 
 
 <div class="footer">
-team 3
+    <div class="footer-title">Team 3</div>
+    <div class="footer-text">This project was designed and developed by</div>
+
+    <div class="team">
+        <span class="ai">AI</span>
+        <span>David</span>
+        <span>Yossi</span>
+        <span>Shimshon</span>
+        <span>Mordy</span>
+    </div>
+
 </div>
 
 </body>
@@ -226,16 +277,3 @@ team 3
 
     return html
 
-
-# if __name__ == "__main__":
-#     images_data = extract_all(r"C:\Users\mordy\PycharmProjects\image_intel3\images\ready")
-#
-#     map_html = create_map(images_data)
-#
-#     timeline_html = create_timeline(images_data)
-#
-#     analysis = file_analysis(images_data)
-#
-#     html = create_report(images_data, map_html, timeline_html, analysis)
-#     with open("test.html", "w", encoding="utf-8") as f:
-#          f.write(html)
